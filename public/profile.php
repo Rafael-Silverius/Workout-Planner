@@ -35,7 +35,8 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" />
     <script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
-    <title>Profile - Workout Logger</title>
+    <title>Profile - Workout-Planner</title>
+    <link rel="icon" type="image/x-icon" href="../assets/icons/fitness.png">
     <link rel="stylesheet" href="style.css" />
     <script defer src="script.js"></script>
 </head>
@@ -210,15 +211,6 @@ if (isset($_SESSION['user_id'])) {
                 </form>
             </div>
         </div>
-        <div id="deleteProfileModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h3 class="form__title">Are you sure you want to delete your profile?</h3>
-                <button>Yes</button>
-                <button>No</button>
-            </div>
-        </div>
-
     </section>
 
     <!-- Footer Section -->

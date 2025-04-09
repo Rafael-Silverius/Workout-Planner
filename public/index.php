@@ -8,7 +8,8 @@ session_start();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Workout Logger</title>
+  <title>Workout-Planner</title>
+  <link rel="icon" type="image/x-icon" href="../assets/icons/fitness.png">
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +18,6 @@ session_start();
   <!-- Include Toastify.js -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
 </head>
 
 <body class="index">

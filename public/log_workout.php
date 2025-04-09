@@ -15,7 +15,8 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Workout Logger</title>
+    <title>Log your Workouts - Workout-Planner</title>
+    <link rel="icon" type="image/x-icon" href="../assets/icons/fitness.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
@@ -29,18 +30,18 @@ if (!isset($_SESSION['user_id'])) {
 </head>
 
 <header>
-        <a href="index.php"><img class="logo" src="../assets/images/exercise1.png" alt=""></a>
-        <nav>
-            <a href="index.php">Home</a>
-            <a href="log_workout.php">Log Workout</a>
-            <a href="profile.php">Profile</a>
-            <a href="../backend/logout.php">Logout</a>
-        </nav>
+    <a href="index.php"><img class="logo" src="../assets/images/exercise1.png" alt=""></a>
+    <nav>
+        <a href="index.php">Home</a>
+        <a href="log_workout.php">Log Workout</a>
+        <a href="profile.php">Profile</a>
+        <a href="../backend/logout.php">Logout</a>
+    </nav>
 </header>
 
 <body class="log-workout">
     <!-- Header Section -->
-    
+
 
     <div class="main">
         <div class="sidebar">

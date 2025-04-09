@@ -483,6 +483,8 @@ if (document.body.classList.contains("profile")) {
           croppedImageInput.value = reader.result; // Set to hidden input
         };
         reader.readAsDataURL(blob);
+        cropButton.style.backgroundColor = "#77b55a";
+        cropButton.style.color = "white";
       });
     }
   });
