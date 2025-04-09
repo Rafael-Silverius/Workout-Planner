@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST["password"];
 
     //Prepared Statement
-    $stmt = $conn->prepare("SELECT id, username, password, email, bio, birth, step_goal, weight, height, created_at  FROM users WHERE username = ?");
+    $stmt = $conn->prepare("SELECT id, username, password, email, bio, birth, step_goal, weight, height, profile_img, created_at  FROM users WHERE username = ?");
 
 
     if ($stmt) {
@@ -29,6 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $_SESSION["step_goal"] = $row["step_goal"];
                     $_SESSION["weight"] = $row["weight"];
                     $_SESSION["height"] = $row["height"];
+                    $_SESSION["profile_img"] = $row["profile_img"];
                     $_SESSION["created_at"] = $row["created_at"];
 
                     $_SESSION["toast_message"] = "Welcome back " . ucfirst($_SESSION['username']) . "👋";

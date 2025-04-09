@@ -131,17 +131,37 @@ if (isset($_SESSION['user_id'])) {
                             <p><?php echo isset($_SESSION['height']) ? $_SESSION['height'] : '-'; ?></p>
                         </div>
                         <div class="profile-box-content-tile">
-                            <h3>BMI</h3>
-                            <p><?php
+                            <h3 id="bmi">BMI <span class="info-icon">
+                                    <img src="../assets/icons/info.png" alt="info">
+                                </span>
+                            </h3>
+                            <p>
+                                <?php
                                 if (isset($_SESSION['weight']) && isset($_SESSION['height']) && $_SESSION['height'] != 0) {
                                     $heightMeters = $_SESSION['height'] / 100;
                                     $bmi = $_SESSION['weight'] / ($heightMeters * $heightMeters);
-                                    echo number_format($bmi, 2);
+                                    $bmiFormatted = number_format($bmi, 2);
+
+                                    // Determine the BMI category
+                                    if ($bmi < 18.5) {
+                                        $message = "You are underweight. It's important to eat a balanced diet.";
+                                    } elseif ($bmi >= 18.5 && $bmi < 24.9) {
+                                        $message = "Your weight is normal. Keep maintaining a healthy lifestyle!";
+                                    } elseif ($bmi >= 25 && $bmi < 29.9) {
+                                        $message = "You are overweight. Consider a balanced diet and regular exercise.";
+                                    } else {
+                                        $message = "You are obese. It’s recommended to seek advice from a healthcare provider.";
+                                    }
+
+                                    echo $bmiFormatted;
+                                    echo "<br><small>$message</small>";
                                 } else {
                                     echo '-';
                                 }
-                                ?></p>
+                                ?>
+                            </p>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -200,12 +220,12 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form__row">
                         <label for="height" class="form__label">Height (cm)</label>
-                        <input class="form__input" type="number" step="1" name="height" value="<?php echo isset($_SESSION['height']) ? $_SESSION['height'] : ''; ?>"
+                        <input class="form__input" type="number" step="1" max='300' min='110' name="height" value="<?php echo isset($_SESSION['height']) ? $_SESSION['height'] : ''; ?>"
                             min=0>
                     </div>
                     <div class="form__row">
                         <label for="weight" class="form__label">Weight (kg)</label>
-                        <input class="form__input" type="number" step="0.1" name="weight" value="<?php echo isset($_SESSION['weight']) ? $_SESSION['weight'] : ''; ?>"
+                        <input class="form__input" type="number" step="0.1" max='500' min='20' name="weight" value="<?php echo isset($_SESSION['weight']) ? $_SESSION['weight'] : ''; ?>"
                             min=0>
                     </div>
                     <div class="form__row">

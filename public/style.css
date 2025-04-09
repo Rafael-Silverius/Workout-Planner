@@ -13,7 +13,7 @@
 * {
   margin: 0;
   padding: 0;
-  box-sizing: inherit;
+  box-sizing: border-box;
   color: var(--color-light--2);
   font-family: "Mona Sans", sans-serif;
   font-optical-sizing: auto;
@@ -142,9 +142,9 @@ nav a {
   border-radius: 3px;
   background-color: var(--color-light--3);
   transition: all 0.2s;
-  margin-left: 4px;
   resize: vertical;
 }
+
 .form__input:focus {
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
@@ -152,7 +152,7 @@ nav a {
 }
 
 .workouts-form .form__input {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
 }
 
 .form__input:focus {
@@ -531,6 +531,10 @@ select option {
   text-transform: capitalize;
 }
 
+.editprofileform {
+  align-items: baseline;
+}
+
 .editprofileform > .form__row {
   flex-direction: column;
   align-items: baseline;
@@ -583,12 +587,43 @@ select option {
   font-size: 16px;
 
   h3 {
-    font-size: 10px;
-    color: rgb(207, 206, 206);
+    font-size: 13px;
+    color: rgb(197, 197, 197);
+    text-decoration: underline;
   }
   p {
     font-weight: 500;
+    font-size: 18px;
   }
+}
+
+#bmi {
+  display: flex;
+  align-items: center;
+}
+#bmi .info-icon {
+  margin-left: 8px; /* Space between BMI value and icon */
+  cursor: pointer; /* Make it appear clickable */
+  position: relative;
+}
+
+#bmi .info-icon img {
+  width: 20px;
+  height: 20px; /* Resize the info icon */
+}
+
+.info-icon:hover::after {
+  content: "BMI (Body Mass Index) is a measure of body fat based on height and weight.";
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 200px;
+  text-align: center;
 }
 
 .steps {
