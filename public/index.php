@@ -108,6 +108,7 @@ session_start();
       backSpeed: 150,
       loop: true
     })
+
     <?php
     if (isset($_SESSION["toast_message"])) {
       echo 'Toastify({

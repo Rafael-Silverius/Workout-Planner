@@ -433,6 +433,15 @@ if (document.body.classList.contains("profile")) {
       }
       form.reset(); // Clear all form inputs
     }
+
+    Toastify({
+      text: "Your changes were not saved. Try again",
+      duration: 3000,
+      gravity: "top", // top or bottom
+      position: "center", // left, center, or right
+      className: "large-toast",
+      backgroundColor: "linear-gradient(to right, #ff0000, #ff7f7f)", // Red gradient for failure
+    }).showToast();
   }
 
   if (editButton) {
@@ -485,6 +494,7 @@ if (document.body.classList.contains("profile")) {
         reader.readAsDataURL(blob);
         cropButton.style.backgroundColor = "#77b55a";
         cropButton.style.color = "white";
+        cropButton.disabled = true;
       });
     }
   });

@@ -39,6 +39,9 @@ if (isset($_SESSION['user_id'])) {
     <link rel="icon" type="image/x-icon" href="../assets/icons/fitness.png">
     <link rel="stylesheet" href="style.css" />
     <script defer src="script.js"></script>
+    <!-- Include Toastify.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 
 <body class="profile">
@@ -217,6 +220,24 @@ if (isset($_SESSION['user_id'])) {
     <footer>
         <p>© 2025 Workout Logger. All rights reserved.</p>
     </footer>
+
+    <script>
+        <?php
+        if (isset($_SESSION["toast_message"])) {
+            echo 'Toastify({
+             text: "' . $_SESSION["toast_message"] . '",
+            duration: 3000,
+            gravity: "top", // top or bottom
+            position: "center", // left, center, or right,
+            className: "large-toast",
+            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
+        }).showToast();';
+
+            // Unset the session variable after displaying the toast
+            unset($_SESSION["toast_message"]);
+        }
+        ?>
+    </script>
 
 </body>
 

@@ -89,10 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['profile_img'] = $imagePath;
         }
 
+        $_SESSION["toast_message"] = "Profile Succesfully Updated 🎉";
+
         header("Location: ../public/profile.php");
         exit();
     } else {
-        echo "Error updating profile: " . $stmt->error;
+        $_SESSION["error_message"] = "There was an error when updating your profile info 😢";
     }
 
     $stmt->close();
