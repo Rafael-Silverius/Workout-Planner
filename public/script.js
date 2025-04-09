@@ -392,10 +392,19 @@ if (
 
 if (document.body.classList.contains("profile")) {
   const editButton = document.getElementById("editProfile");
-  const deleteButton = document.getElementById("deleteProfile");
   const editModal = document.getElementById("editProfileModal");
-  const deleteModal = document.getElementById("deleteProfileModal");
   const closeButtons = document.querySelectorAll(".close");
+  const uploadImage = document.getElementById("uploadImage");
+  const imagePreview = document.getElementById("imagePreview");
+  const imagePreviewContainer = document.getElementById(
+    "imagePreviewContainer"
+  );
+  const cropButton = document.getElementById("cropButton");
+  const croppedImageInput = document.getElementById("croppedImageInput");
+  const currentProfileImageContainer = document.getElementById(
+    "currentProfileImageContainer"
+  );
+  let cropper;
 
   function openModal(modal) {
     console.log("Opening modal...");
@@ -405,14 +414,29 @@ if (document.body.classList.contains("profile")) {
   function closeModal(modal) {
     console.log("Closing modal...");
     modal.style.display = "none"; // Hide modal
+
+    // Reset the form inside the modal
+    const form = modal.querySelector("form");
+    if (form) {
+      // Check if the cropper instance exists before calling destroy
+      if (typeof cropper !== "undefined" && cropper !== null) {
+        cropper.destroy(); // Destroy the cropper instance
+      }
+
+      // Clear image preview
+      if (imagePreview) {
+        imagePreview.src = ""; // Clear the preview image
+      }
+
+      if (imagePreviewContainer) {
+        imagePreviewContainer.style.display = "none"; // Hide the preview container
+      }
+      form.reset(); // Clear all form inputs
+    }
   }
 
   if (editButton) {
     editButton.addEventListener("click", () => openModal(editModal));
-  }
-
-  if (deleteButton) {
-    deleteButton.addEventListener("click", () => openModal(deleteModal));
   }
 
   closeButtons.forEach((button) => {
@@ -425,6 +449,41 @@ if (document.body.classList.contains("profile")) {
   window.addEventListener("click", (event) => {
     if (event.target.classList.contains("modal")) {
       closeModal(event.target);
+    }
+  });
+
+  currentProfileImageContainer.addEventListener("click", function () {
+    uploadImage.click();
+  });
+
+  uploadImage.addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        imagePreview.src = reader.result;
+        imagePreviewContainer.style.display = "block";
+
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(imagePreview, {
+          aspectRatio: 1,
+          viewMode: 1,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  cropButton.addEventListener("click", function () {
+    if (cropper) {
+      const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+      canvas.toBlob(function (blob) {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          croppedImageInput.value = reader.result; // Set to hidden input
+        };
+        reader.readAsDataURL(blob);
+      });
     }
   });
 }

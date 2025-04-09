@@ -33,11 +33,11 @@ if (isset($_SESSION['user_id'])) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" />
+    <script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
     <title>Profile - Workout Logger</title>
     <link rel="stylesheet" href="style.css" />
     <script defer src="script.js"></script>
-
-
 </head>
 
 <body class="profile">
@@ -58,14 +58,18 @@ if (isset($_SESSION['user_id'])) {
         <div class="profile-container">
             <div class="profile-header">
                 <div class="left">
-                    <img src="../assets/icons/user.png" alt="profilePic">
+                    <img
+                        src="<?php echo htmlspecialchars(isset($_SESSION['profile_img']) ? $_SESSION['profile_img'] : '../assets/icons/user.png'); ?>"
+                        alt="Profile Picture"
+                        class="profile-img"
+                        onerror="this.src='../assets/icons/user.png';" />
                     <div class="">
                         <h2> <?php echo ucfirst($_SESSION['username']); ?></h2>
                         <h3>location</h3>
                         <h3 class="bio"><?php echo isset($_SESSION['bio']) ? $_SESSION['bio'] : ''; ?></h3>
                     </div>
                 </div>
-                <button class="editProfilebtn">
+                <button class="editProfilebtn" id="editProfile">
                     <img src="../assets/icons/edit.png" alt="editIcon">
                     Edit
                 </button>
@@ -137,33 +141,82 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
             </div>
+        </div>
 
 
-            <!-- <div id="editProfileModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2 class="form__title">Edit your profile</h2>
-                    <form class="form" action="edit_profile.php" method="POST">
+        <div id="editProfileModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="form__title">Edit your profile</h2>
+                <form class="form editprofileform" action="../backend/update_profile.php" method="POST" enctype="multipart/form-data">
+                    <div class="form__row">
+                        <label for="profile_img" class="form__label">Profile Image</label>
+                        <!-- Current Profile Image Display (if exists, otherwise default image) -->
+                        <div id="currentProfileImageContainer" style="margin-top: 10px; display: flex; align-items: center; cursor: pointer;">
+                            <img
+                                id="currentProfileImage"
+                                src="<?php echo isset($_SESSION['profile_img']) ? $_SESSION['profile_img'] : '../assets/icons/user.png'; ?>"
+                                alt="Profile Image"
+                                class="profile-img" />
+                        </div>
+                        <label class="form__label">Click on the image to select a new one! </label>
 
-                        <div class="form__row">
-                            <input class="form__input" type="text" name="username" placeholder="username" required>
+                        <!-- File Selector -->
+                        <input class="form__input hidden" type="file" name="profile_img" id="uploadImage" accept="image/*">
+
+                        <!-- Image Preview Area -->
+                        <div id="imagePreviewContainer" style="margin-top: 10px; display: none;  width:200px; height: 100px;">
+                            <img id="imagePreview" />
                         </div>
-                        <div class="form__row">
-                            <input class="form__input" type="password" name="password" placeholder="password" required>
-                        </div>
-                        <div class="form__row">
-                            <button type="submit" class="modal-btn">Save Changes</button>
-                        </div>
-                    </form>
-                </div>
+
+                        <!-- Crop Button -->
+                        <button type="button" id="cropButton" style="margin-top: 10px; color:black">Use the croped image</button>
+
+                        <!-- Hidden input to store base64 image -->
+                        <input type="hidden" name="cropped_image" id="croppedImageInput">
+                    </div>
+                    <div class="form__row">
+                        <label for="username" class="form__label">Username</label>
+                        <input class="form__input" type="text" name="username" value=<?php echo $_SESSION['username'] ?>>
+                    </div>
+                    <div class="form__row">
+                        <label for="bio" class="form__label">Bio</label>
+                        <textarea class="form__input" name="bio" id="bio" rows="2" value="Add something about you.."><?php echo isset($_SESSION['bio']) ? $_SESSION['bio'] : ''; ?></textarea>
+                    </div>
+                    <div class="form__row">
+                        <label for="birth" class="form__label">Date of Birht</label>
+                        <input class="form__input" type="date" name="birth"
+                            value="<?php echo isset($_SESSION['birth']) ? $_SESSION['birth'] : ''; ?>"
+                            max="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    <div class="form__row">
+                        <label for="step_goal" class="form__label">Daily Step Goal</label>
+                        <input class="form__input" type="number" name="step_Goal" value="<?php echo isset($_SESSION['step_goal']) ? $_SESSION['step_goal'] : ''; ?>"
+                            min=0>
+                    </div>
+                    <div class="form__row">
+                        <label for="height" class="form__label">Height (cm)</label>
+                        <input class="form__input" type="number" step="1" name="height" value="<?php echo isset($_SESSION['height']) ? $_SESSION['height'] : ''; ?>"
+                            min=0>
+                    </div>
+                    <div class="form__row">
+                        <label for="weight" class="form__label">Weight (kg)</label>
+                        <input class="form__input" type="number" step="0.1" name="weight" value="<?php echo isset($_SESSION['weight']) ? $_SESSION['weight'] : ''; ?>"
+                            min=0>
+                    </div>
+                    <div class="form__row">
+                        <button type="submit" class="modal-btn">Save Changes</button>
+                    </div>
+                </form>
             </div>
-            <div id="deleteProfileModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h3 class="form__title">Are you sure you want to delete your profile?</h3>
-                    <button>Yes</button>
-                    <button>No</button>
-                </div>-->
+        </div>
+        <div id="deleteProfileModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3 class="form__title">Are you sure you want to delete your profile?</h3>
+                <button>Yes</button>
+                <button>No</button>
+            </div>
         </div>
 
     </section>
