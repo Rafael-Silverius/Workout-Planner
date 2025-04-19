@@ -16,6 +16,7 @@ $checkStmt->close();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
+    $location = $_POST['location'];
     $bio = $_POST['bio'];
     $birth = $_POST['birth'];
     $step_goal = $_POST['step_Goal'];
@@ -63,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Update user info
-    $sql = "UPDATE users SET username = ?, bio = ?, birth = ?, step_goal = ?, height = ?, weight = ?";
+    $sql = "UPDATE users SET username = ?, location = ? , bio = ?, birth = ?, step_goal = ?, height = ?, weight = ?";
     if ($imagePath) {
         $sql .= ", profile_img = ?";
     }
@@ -72,14 +73,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->prepare($sql);
 
     if ($imagePath) {
-        $stmt->bind_param("ssssddsi", $username, $bio, $birth, $step_goal, $height, $weight, $imagePath, $userId);
+        $stmt->bind_param("sssssddsi", $username, $location, $bio, $birth, $step_goal, $height, $weight, $imagePath, $userId);
     } else {
-        $stmt->bind_param("ssssddi", $username, $bio, $birth, $step_goal, $height, $weight, $userId);
+        $stmt->bind_param("sssssddi", $username, $location, $bio, $birth, $step_goal, $height, $weight, $userId);
     }
 
     if ($stmt->execute()) {
         // Update session values
         $_SESSION['username'] = $username;
+        $_SESSION['location'] = $location;
         $_SESSION['bio'] = $bio;
         $_SESSION['birth'] = $birth;
         $_SESSION['step_goal'] = $step_goal;

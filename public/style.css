@@ -245,18 +245,26 @@ button {
   font-size: 18px;
   cursor: pointer;
   margin-top: 20px;
+  border: none;
   border-radius: 6px;
-  font-weight: 400;
+  font-weight: 500;
   padding: 8px 16px;
+  color: var(--color-dark--2);
 }
 .hero-content button,
-.form__btn {
+.form__btn,
+.tab-button.active,
+.editProfilebtn {
   border: 1px solid #4b8f29;
   box-shadow: 0px 10px 14px -7px #3e7327;
   background: linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
   background-color: #77b55a;
   margin-top: 2rem;
+  color: var(--color-light--2);
+  display: flex;
+  align-items: center;
 }
+
 #deleteProfile {
   border: 1px solid #d32f2f;
   box-shadow: 0px 10px 14px -7px #b71c1c;
@@ -266,13 +274,17 @@ button {
 }
 
 .hero-content button:hover,
-.form__btn:hover {
+.form__btn:hover,
+.tab-button:hover,
+.editProfilebtn:hover {
   background: linear-gradient(to bottom, #639948 0%, #77b55a 100%);
   background-color: #72b352;
+  color: var(--color-light--2);
 }
 
 .hero-content button:active,
-.form__btn:active {
+.form__btn:active,
+.tab-button:active {
   transform: scale(0.98);
   box-shadow: 0px 5px 10px -5px #3e7327;
 }
@@ -507,20 +519,11 @@ select option {
 .cropper-view-box {
   border-radius: 50% !important;
 }
+
 .bio {
   max-width: 400px;
 }
-.editProfilebtn {
-  border: none;
-  width: min-content;
-  height: min-content;
-  display: flex;
-  align-items: center;
-  color: black;
-  font-weight: 600;
-  padding: 10px;
-  margin-top: 10px;
-}
+
 .editProfilebtn > img {
   width: 28px;
   height: 28px;
@@ -546,14 +549,22 @@ select option {
   font-size: 1.3rem;
   font-weight: 400;
 }
-
 .profile-boxes {
+  display: none;
+}
+
+.profile-boxes.active {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* two columns total */
-  grid-template-rows: auto auto; /* two rows */
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto auto;
   gap: 20px;
-  justify-items: center; /* centers content horizontally inside the cells */
+  justify-items: center;
   padding: 20px;
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
 }
 
 .profile-box {
@@ -570,6 +581,22 @@ select option {
     font-size: 16px;
   }
 }
+.chart-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background-color: var(--color-dark--2);
+  border-radius: 12px;
+  overflow-x: auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#weightChart {
+  width: 100% !important;
+  height: auto !important;
+}
+
 #cropButton {
   font-size: 12px;
   padding: 4px 8px;
@@ -594,6 +621,7 @@ select option {
   p {
     font-weight: 500;
     font-size: 18px;
+    line-height: 18px;
   }
 }
 
@@ -732,7 +760,7 @@ footer {
 }
 
 @media (max-width: 1200px) {
-  .profile-boxes {
+  .profile-boxes.active {
     display: flex;
     flex-direction: column;
   }
@@ -742,5 +770,8 @@ footer {
   }
   .steps {
     text-align: left;
+  }
+  body {
+    height: auto;
   }
 }

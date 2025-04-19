@@ -404,6 +404,12 @@ if (document.body.classList.contains("profile")) {
   const currentProfileImageContainer = document.getElementById(
     "currentProfileImageContainer"
   );
+  const ctx = document.getElementById("weightChart").getContext("2d");
+  const overviewBtn = document.getElementById("overviewbtn");
+  const overviewTab = document.getElementById("overview");
+
+  const weightBtn = document.getElementById("weightbtn");
+  const weightTab = document.getElementById("weight");
   let cropper;
 
   function openModal(modal) {
@@ -497,5 +503,89 @@ if (document.body.classList.contains("profile")) {
         cropButton.disabled = true;
       });
     }
+  });
+
+  fetch("../backend/get_weights.php")
+    .then((response) => response.json())
+    .then((chartData) => {
+      const chartCanvas = document.getElementById("weightChart");
+      const ctx = document.getElementById("weightChart").getContext("2d");
+
+      const labelCount = chartData.labels.length;
+      chartCanvas.width = labelCount * 80;
+
+      const weightChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            {
+              label: "Weight (kg)",
+              data: chartData.data,
+              borderColor: "#4CAF50",
+              backgroundColor: "rgba(76, 175, 80, 0.1)",
+              tension: 0.3,
+              pointBackgroundColor: "#4CAF50",
+              pointBorderColor: "#fff",
+              pointHoverRadius: 8,
+              pointHoverBackgroundColor: "#388E3C",
+              pointHoverBorderColor: "#fff",
+              pointHoverBorderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: "#fff",
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: "#fff",
+              },
+              grid: {
+                color: "#fff",
+              },
+            },
+            y: {
+              ticks: {
+                color: "#fff",
+              },
+              grid: {
+                color: "#fff",
+              },
+            },
+          },
+          hover: {
+            mode: "nearest",
+            intersect: true,
+          },
+          interaction: {
+            mode: "index",
+            intersect: false,
+          },
+        },
+      });
+    })
+    .catch((error) => {
+      console.error("Error loading chart data:", error);
+    });
+
+  weightBtn.addEventListener("click", function () {
+    overviewTab.classList.remove("active");
+    overviewBtn.classList.remove("active");
+    weightBtn.classList.add("active");
+    weightTab.classList.add("active");
+  });
+  overviewBtn.addEventListener("click", function () {
+    weightBtn.classList.remove("active");
+    weightTab.classList.remove("active");
+    overviewTab.classList.add("active");
+    overviewBtn.classList.add("active");
   });
 }

@@ -1,27 +1,41 @@
 <?php
 session_start();
 include('../backend/config.php');
+include('../backend/calc_steps.php');
 
 if (isset($_SESSION['user_id'])) {
-    $stmt = $conn->prepare("SELECT username, email, created_at, birth, bio, weight, height, step_goal FROM users WHERE id = ?");
+    // Get profile info
+    $stmt = $conn->prepare("SELECT username, email, created_at, location, birth, bio, height, step_goal FROM users WHERE id = ?");
     $stmt->bind_param("i", $_SESSION['user_id']);
 
     if ($stmt->execute()) {
         $result = $stmt->get_result();
         if ($result && $row = $result->fetch_assoc()) {
-            // Update session variables with fresh data
             $_SESSION['username'] = $row['username'];
             $_SESSION['email'] = $row['email'];
             $_SESSION['created_at'] = $row['created_at'];
+            $_SESSION['location'] = $row['location'];
             $_SESSION['birth'] = $row['birth'];
             $_SESSION['bio'] = $row['bio'];
-            $_SESSION['weight'] = $row['weight'];
             $_SESSION['height'] = $row['height'];
             $_SESSION['step_goal'] = $row['step_goal'];
         }
     }
     $stmt->close();
+
+    // Get latest weight
+    $stmt = $conn->prepare("SELECT weight FROM weights WHERE user_id = ? ORDER BY date DESC LIMIT 1");
+    $stmt->bind_param("i", $_SESSION['user_id']);
+
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $_SESSION['weight'] = $row['weight'];
+        }
+    }
+    $stmt->close();
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -38,6 +52,7 @@ if (isset($_SESSION['user_id'])) {
     <title>Profile - Workout-Planner</title>
     <link rel="icon" type="image/x-icon" href="../assets/icons/fitness.png">
     <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="script.js"></script>
     <!-- Include Toastify.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -69,7 +84,7 @@ if (isset($_SESSION['user_id'])) {
                         onerror="this.src='../assets/icons/user.png';" />
                     <div class="">
                         <h2> <?php echo ucfirst($_SESSION['username']); ?></h2>
-                        <h3>location</h3>
+                        <h3>Location: <span><?php echo isset($_SESSION['location']) ? $_SESSION['location'] : ''; ?></span></h3>
                         <h3 class="bio"><?php echo isset($_SESSION['bio']) ? $_SESSION['bio'] : ''; ?></h3>
                     </div>
                 </div>
@@ -78,17 +93,29 @@ if (isset($_SESSION['user_id'])) {
                     Edit
                 </button>
             </div>
-            <div class="profile-boxes">
-                <div class="profile-box steps">
-                    <div class="profile-box-header">
-                        <h2>Todays Progress</h2>
-                    </div>
-                    <div class="profile-box-content">
-                        <div class="profile-box-content-tile steps">
-                            <p>23 / <?php echo $_SESSION['step_goal'] . ' Steps'; ?> </p>
+
+
+            <div class="tabs">
+                <button class="tab-button active" id="overviewbtn">Overview</button>
+                <button class="tab-button" id="weightbtn">Weight Tracker</button>
+            </div>
+
+
+            <div class="profile-boxes active" id="overview">
+                <?php
+                echo isset($_SESSION['step_goal']) ?
+                    '<div class="profile-box steps">
+                        <div class="profile-box-header">
+                          <h2>Today\'s Progress</h2>
                         </div>
-                    </div>
-                </div>
+                     <div class="profile-box-content">
+                            <div class="profile-box-content-tile steps">
+                                <p>' . $steps . '/' . $_SESSION['step_goal'] . ' Steps</p>
+                           </div>
+                     </div>
+                    </div>'
+                    : '';
+                ?>
 
                 <div class="profile-box">
                     <div class="profile-box-header">
@@ -123,11 +150,11 @@ if (isset($_SESSION['user_id'])) {
                             <p><?php echo isset($_SESSION['step_goal']) ? $_SESSION['step_goal'] : '-'; ?></p>
                         </div>
                         <div class="profile-box-content-tile">
-                            <h3>Weight</h3>
+                            <h3>Weight (kg)</h3>
                             <p><?php echo isset($_SESSION['weight']) ? $_SESSION['weight'] : '-'; ?></p>
                         </div>
                         <div class="profile-box-content-tile">
-                            <h3>Height</h3>
+                            <h3>Height (cm)</h3>
                             <p><?php echo isset($_SESSION['height']) ? $_SESSION['height'] : '-'; ?></p>
                         </div>
                         <div class="profile-box-content-tile">
@@ -165,6 +192,19 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
             </div>
+
+            <div class="profile-boxes chart-container" id="weight">
+                <canvas id="weightChart"></canvas>
+                <form class="form" id="weightForm" method="POST" action="../backend/update_weight.php">
+                    <div class="form__row">
+                        <label class="form__label">Enter today's weight (kg):</label>
+                        <input class="form__input" type="number" step="0.1" id="weightInput" name="weight" required>
+                    </div>
+                    <div class="form__row">
+                        <button class="form__btn" type="submit">Add</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
 
@@ -201,14 +241,18 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form__row">
                         <label for="username" class="form__label">Username</label>
-                        <input class="form__input" type="text" name="username" value=<?php echo $_SESSION['username'] ?>>
+                        <input class="form__input" type="text" name="username" value=<?php echo htmlspecialchars($_SESSION['username']) ?>>
+                    </div>
+                    <div class="form__row">
+                        <label for="username" class="form__label">Location</label>
+                        <input class="form__input" type="text" name="location" value=<?php echo isset($_SESSION['location']) ? $_SESSION['location'] : ''; ?>>
                     </div>
                     <div class="form__row">
                         <label for="bio" class="form__label">Bio</label>
-                        <textarea class="form__input" name="bio" id="bio" rows="2" value="Add something about you.."><?php echo isset($_SESSION['bio']) ? $_SESSION['bio'] : ''; ?></textarea>
+                        <textarea class="form__input" name="bio" id="bio" rows="2"><?php echo isset($_SESSION['bio']) ? $_SESSION['bio'] : ''; ?></textarea>
                     </div>
                     <div class="form__row">
-                        <label for="birth" class="form__label">Date of Birht</label>
+                        <label for="birth" class="form__label">Date of Birth</label>
                         <input class="form__input" type="date" name="birth"
                             value="<?php echo isset($_SESSION['birth']) ? $_SESSION['birth'] : ''; ?>"
                             max="<?php echo date('Y-m-d'); ?>">
@@ -220,13 +264,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form__row">
                         <label for="height" class="form__label">Height (cm)</label>
-                        <input class="form__input" type="number" step="1" max='300' min='110' name="height" value="<?php echo isset($_SESSION['height']) ? $_SESSION['height'] : ''; ?>"
-                            min=0>
-                    </div>
-                    <div class="form__row">
-                        <label for="weight" class="form__label">Weight (kg)</label>
-                        <input class="form__input" type="number" step="0.1" max='500' min='20' name="weight" value="<?php echo isset($_SESSION['weight']) ? $_SESSION['weight'] : ''; ?>"
-                            min=0>
+                        <input class="form__input" type="number" step="1" max='300' min='110' name="height" value="<?php echo isset($_SESSION['height']) ? $_SESSION['height'] : ''; ?>">
                     </div>
                     <div class="form__row">
                         <button type="submit" class="modal-btn">Save Changes</button>
@@ -253,7 +291,6 @@ if (isset($_SESSION['user_id'])) {
             backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
         }).showToast();';
 
-            // Unset the session variable after displaying the toast
             unset($_SESSION["toast_message"]);
         }
         ?>
