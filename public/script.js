@@ -142,7 +142,9 @@ if (document.body.classList.contains("log-workout")) {
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(this.#map); // Fixed reference to this.#map
 
-      this.#map.on("click", this._showForm.bind(this));
+      this.#map.whenReady(() => {
+        this.#map.on("click", this._showForm.bind(this));
+      });
     }
 
     _showForm(mapE) {
@@ -298,9 +300,18 @@ if (document.body.classList.contains("log-workout")) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(workout),
       })
-        .then((response) => response.text()) // Get raw text first
+        .then((response) => {
+          console.log("Response status:", response.status); // Log the status
+          return response.text(); // Get raw text first
+        })
         .then((text) => {
-          return JSON.parse(text); // Then parse JSON
+          console.log("Response body:", text); // Log the raw response body
+          try {
+            return JSON.parse(text); // Attempt to parse JSON
+          } catch (error) {
+            console.error("Error parsing JSON:", error); // Catch JSON parsing errors
+            throw error; // Throw the error so it can be handled
+          }
         })
         .then((data) => {
           console.log("Parsed response:", data);
@@ -338,7 +349,6 @@ if (document.body.classList.contains("log-workout")) {
     }
 
     _loadWorkouts() {
-      document.querySelector(".spinner-container").style.display = "block";
       fetch("../backend/get_workout.php")
         .then((response) => response.json())
         .then((data) => {
@@ -404,12 +414,10 @@ if (document.body.classList.contains("profile")) {
   const currentProfileImageContainer = document.getElementById(
     "currentProfileImageContainer"
   );
+  const stepsContainer = document.getElementById("steps");
+  const stepGoal = parseInt(stepsContainer.dataset.stepGoal);
   const ctx = document.getElementById("weightChart").getContext("2d");
-  const overviewBtn = document.getElementById("overviewbtn");
-  const overviewTab = document.getElementById("overview");
 
-  const weightBtn = document.getElementById("weightbtn");
-  const weightTab = document.getElementById("weight");
   let cropper;
 
   function openModal(modal) {
@@ -542,6 +550,24 @@ if (document.body.classList.contains("profile")) {
                 color: "#fff",
               },
             },
+            annotation: {
+              annotations: {
+                targetWeightLine: {
+                  type: "line",
+                  yMin: 70,
+                  yMax: 70,
+                  borderColor: "red",
+                  borderWidth: 2,
+                  label: {
+                    content: "Target Weight",
+                    enabled: true,
+                    position: "end",
+                    backgroundColor: "red",
+                    color: "#fff",
+                  },
+                },
+              },
+            },
           },
           scales: {
             x: {
@@ -576,16 +602,116 @@ if (document.body.classList.contains("profile")) {
       console.error("Error loading chart data:", error);
     });
 
-  weightBtn.addEventListener("click", function () {
-    overviewTab.classList.remove("active");
-    overviewBtn.classList.remove("active");
-    weightBtn.classList.add("active");
-    weightTab.classList.add("active");
-  });
-  overviewBtn.addEventListener("click", function () {
-    weightBtn.classList.remove("active");
-    weightTab.classList.remove("active");
-    overviewTab.classList.add("active");
-    overviewBtn.classList.add("active");
+  fetch("../backend/get_steps.php")
+    .then((response) => response.json())
+    .then((chartData) => {
+      const chartCanvas = document.getElementById("stepsChart");
+      const ctx = chartCanvas.getContext("2d");
+
+      const labelCount = chartData.labels.length;
+      chartCanvas.width = labelCount * 80;
+
+      const stepsChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            {
+              label: "Steps",
+              data: chartData.data,
+              borderColor: "#4CAF50",
+              backgroundColor: "rgba(76, 175, 79, 0.62)",
+              tension: 0.3,
+              pointBackgroundColor: "#4CAF50",
+              pointBorderColor: "#fff",
+              pointHoverRadius: 8,
+              pointHoverBackgroundColor: "#388E3C",
+              pointHoverBorderColor: "#fff",
+              pointHoverBorderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: "#fff",
+              },
+            },
+            annotation: {
+              annotations: {
+                stepGoalLine: {
+                  type: "line",
+                  yMin: stepGoal,
+                  yMax: stepGoal,
+                  borderColor: "red",
+                  borderWidth: 2,
+                  label: {
+                    content: "Daily Step Goal",
+                    enabled: true,
+                    position: "end",
+                    backgroundColor: "red",
+                    color: "#fff",
+                  },
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: "#fff",
+              },
+              grid: {
+                color: "#fff",
+              },
+            },
+            y: {
+              ticks: {
+                color: "#fff",
+              },
+              grid: {
+                color: "#fff",
+              },
+            },
+          },
+          hover: {
+            mode: "nearest",
+            intersect: true,
+          },
+          interaction: {
+            mode: "index",
+            intersect: false,
+          },
+        },
+      });
+    })
+    .catch((error) => {
+      console.error("Error loading chart data:", error);
+    });
+
+  const tabs = {
+    overviewbtn: "overview",
+    weightbtn: "weight",
+    Stepsbtn: "steps",
+  };
+
+  document.querySelectorAll(".tab-button").forEach((button) => {
+    button.addEventListener("click", (e) => {
+      // Remove 'active' from all buttons
+      document.querySelectorAll(".tab-button").forEach((btn) => {
+        btn.classList.remove("active");
+      });
+
+      // Add 'active' to the clicked button
+      button.classList.add("active");
+
+      Object.values(tabs).forEach((id) =>
+        document.getElementById(id).classList.add("hidden")
+      );
+      document.getElementById(tabs[button.id]).classList.remove("hidden");
+    });
   });
 }

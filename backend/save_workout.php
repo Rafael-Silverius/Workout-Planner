@@ -37,7 +37,12 @@ if ($stmt) {
 
     if ($stmt->execute()) {
         http_response_code(201);
-        echo json_encode(["status" => "success", "message" => "Workout saved successfully"]);
+        include('update_steps.php');
+        echo json_encode([
+            "status" => "success",
+            "message" => "Workout saved successfully",
+            "steps_message" => $steps_updated_message
+        ]);
     } else {
         http_response_code(500);
         echo json_encode(["status" => "error", "message" => "Execution failed: " . $stmt->error]);

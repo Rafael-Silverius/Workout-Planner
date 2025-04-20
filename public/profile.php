@@ -1,7 +1,6 @@
 <?php
 session_start();
 include('../backend/config.php');
-include('../backend/calc_steps.php');
 
 if (isset($_SESSION['user_id'])) {
     // Get profile info
@@ -34,6 +33,18 @@ if (isset($_SESSION['user_id'])) {
         }
     }
     $stmt->close();
+
+    //Get steps
+    $stmt = $conn->prepare("SELECT steps FROM steps WHERE user_id = ? ");
+    $stmt->bind_param("i", $_SESSION['user_id']);
+
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $_SESSION['steps'] = $row['steps'];
+        } else $_SESSION['steps'] = 0;
+    }
+    $stmt->close();
 }
 
 ?>
@@ -54,6 +65,7 @@ if (isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
     <!-- Include Toastify.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -98,24 +110,46 @@ if (isset($_SESSION['user_id'])) {
             <div class="tabs">
                 <button class="tab-button active" id="overviewbtn">Overview</button>
                 <button class="tab-button" id="weightbtn">Weight Tracker</button>
+                <button class="tab-button" id="Stepsbtn">Steps Counter</button>
             </div>
 
 
-            <div class="profile-boxes active" id="overview">
+            <div class="profile-boxes" id="overview">
                 <?php
-                echo isset($_SESSION['step_goal']) ?
-                    '<div class="profile-box steps">
-                        <div class="profile-box-header">
-                          <h2>Today\'s Progress</h2>
-                        </div>
-                     <div class="profile-box-content">
-                            <div class="profile-box-content-tile steps">
-                                <p>' . $steps . '/' . $_SESSION['step_goal'] . ' Steps</p>
-                           </div>
-                     </div>
-                    </div>'
-                    : '';
+                if (isset($_SESSION['step_goal']) && isset($_SESSION['steps'])) {
+                    $steps = $_SESSION['steps'];
+                    $step_goal = $_SESSION['step_goal'];
+                    $progress = ($steps / $step_goal) * 100; // Calculate percentage progress
+
+                    // Define motivational messages based on progress
+                    if ($progress >= 100) {
+                        $message = "Great job! You've hit your goal!";
+                    } elseif ($progress >= 75) {
+                        $message = "Keep going! You're almost there!";
+                    } elseif ($progress >= 50) {
+                        $message = "Nice work! Halfway to your goal!";
+                    } elseif ($progress >= 25) {
+                        $message = "Good start! Keep up the effort!";
+                    } else {
+                        $message = "You’re doing great! Let’s keep moving!";
+                    }
+
+                    echo '<div class="profile-box steps">
+                <div class="profile-box-header">
+                    <h2>Today\'s Progress</h2>
+                </div>
+                <div class="profile-box-content">
+                    <div class="profile-box-content-tile steps">
+                        <p>' . $steps . '/' . $step_goal . ' Steps</p>
+                    </div>
+                    <div class="profile-box-content-tile motivation">
+                        <small>' . $message . '</small>
+                    </div>
+                </div>
+              </div>';
+                }
                 ?>
+
 
                 <div class="profile-box">
                     <div class="profile-box-header">
@@ -171,13 +205,13 @@ if (isset($_SESSION['user_id'])) {
 
                                     // Determine the BMI category
                                     if ($bmi < 18.5) {
-                                        $message = "You are underweight. It's important to eat a balanced diet.";
+                                        $message = "You are considered underweight. It's important to eat a balanced diet.";
                                     } elseif ($bmi >= 18.5 && $bmi < 24.9) {
                                         $message = "Your weight is normal. Keep maintaining a healthy lifestyle!";
                                     } elseif ($bmi >= 25 && $bmi < 29.9) {
-                                        $message = "You are overweight. Consider a balanced diet and regular exercise.";
+                                        $message = "You are considered overweight. Consider a balanced diet and regular exercise.";
                                     } else {
-                                        $message = "You are obese. It’s recommended to seek advice from a healthcare provider.";
+                                        $message = "You are considered obese. It’s recommended to seek advice from a healthcare provider.";
                                     }
 
                                     echo $bmiFormatted;
@@ -193,17 +227,31 @@ if (isset($_SESSION['user_id'])) {
                 </div>
             </div>
 
-            <div class="profile-boxes chart-container" id="weight">
+
+            <div class="profile-boxes chart-container hidden" id="weight">
                 <canvas id="weightChart"></canvas>
                 <form class="form" id="weightForm" method="POST" action="../backend/update_weight.php">
+                    <label class="form__label">Enter today's weight (kg):</label>
                     <div class="form__row">
-                        <label class="form__label">Enter today's weight (kg):</label>
-                        <input class="form__input" type="number" step="0.1" id="weightInput" name="weight" required>
+                        <input class="form__input" type="number" step="0.1" id="weightInput" name="weight" required min=30 max=300>
                     </div>
                     <div class="form__row">
                         <button class="form__btn" type="submit">Add</button>
                     </div>
                 </form>
+            </div>
+            <div
+                class="chart-container hidden"
+                id="steps"
+                data-step-goal="<?= $_SESSION['step_goal'] ?>">
+                <?php
+                if ($_SESSION['steps'] != 0) {
+                    echo '<canvas id="stepsChart"></canvas>';
+                } else {
+                    echo '<button onclick="window.location.href=\'log_workout.php\'">Start by logging a workout</button>';
+                }
+                ?>
+                <button class="button tab-button" onclick="window.location.href='log_workout.php'">Add new workout</button>
             </div>
         </div>
 
