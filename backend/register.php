@@ -36,8 +36,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $check_stmt->close();
 
-    // Hash the password before saving
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    // Use Argon2id for secure password hashing
+    $options = [
+        'memory_cost' => 1 << 17, // 128MB
+        'time_cost' => 4,
+        'threads' => 2
+    ];
+    $hashed_password = password_hash($password, PASSWORD_ARGON2ID, $options);
 
     // Prepare the SQL statement for insertion
     $stmt = $conn->prepare("INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, ?)");
@@ -47,8 +52,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("ssss", $username, $email, $hashed_password, $created_at);
 
         if ($stmt->execute()) {
+
+
             // Get the new user's ID
             $user_id = $stmt->insert_id;
+
+            $default_steps = 10000;
+            $insert_goal_stmt = $conn->prepare("INSERT INTO goals (user_id, step_goal) VALUES (?, ?)");
+            if ($insert_goal_stmt) {
+                $insert_goal_stmt->bind_param("ii", $user_id, $default_steps);
+                $insert_goal_stmt->execute();
+                $insert_goal_stmt->close();
+            }
 
             // Set session variables for logged-in user
             $_SESSION["user_id"] = $user_id;

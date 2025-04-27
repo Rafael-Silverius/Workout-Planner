@@ -109,38 +109,50 @@ if (document.body.classList.contains("log-workout")) {
 
     constructor() {
       this._getPosition();
-      this._loadWorkouts();
       form.addEventListener("submit", this._newWorkout.bind(this));
       input_type.addEventListener("change", this._toggleElevationField);
       containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
+      this._loadWorkouts();
     }
 
     _getPosition() {
       document.querySelector(".spinner-container").style.display = "block";
-      navigator.geolocation.getCurrentPosition(
-        this._loadMap.bind(this), // Success callback
-        (error) => {
-          // Error callback
-          if (error.code === error.PERMISSION_DENIED) {
-            alert("Please allow location access to proceed.");
-          }
-          document.querySelector(".spinner-container").style.display = "none";
-        }
-      );
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          this._loadMap.bind(this), // success
+          this._loadDefaultMap.bind(this) // error
+        );
+      } else {
+        this._loadDefaultMap(); // browser doesn't support
+      }
     }
 
     _loadMap(position) {
-      const latitude = position["coords"]["latitude"];
-      const longitude = position["coords"]["longitude"];
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
 
       const coords = [latitude, longitude];
+      this._initializeMap(coords);
+    }
 
+    _loadDefaultMap() {
+      // Default location if user denies permission
+      const defaultCoords = [37.9838, 23.7275]; //Athens, Greece 🇬🇷
+      alert(
+        "Location access denied. Showing default location (Athens, Greece)."
+      );
+      this._initializeMap(defaultCoords);
+    }
+
+    _initializeMap(coords) {
       this.#map = L.map("map").setView(coords, 13);
 
       L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(this.#map); // Fixed reference to this.#map
+
+      console.log("Map initialized:", this.#map); // Log to confirm map is set
 
       this.#map.whenReady(() => {
         this.#map.on("click", this._showForm.bind(this));
@@ -215,21 +227,34 @@ if (document.body.classList.contains("log-workout")) {
     }
 
     _renderWorkoutMarker(workout) {
-      L.marker(workout.coords)
-        .addTo(this.#map)
-        .bindPopup(
-          L.popup({
-            maxWidth: 250,
-            minWidth: 100,
-            autoClose: false,
-            closeOnClick: false,
-            className: `${workout.type}-popup`,
-          })
-        )
-        .setPopupContent(
-          `${workout.type === "running" ? "🏃‍♂️" : "🚴‍♀️"} ${workout.description}`
-        )
-        .openPopup();
+      if (!this.#map) {
+        console.error("Map is not initialized yet.");
+        return;
+      }
+
+      if (
+        workout &&
+        Array.isArray(workout.coords) &&
+        workout.coords.length === 2
+      ) {
+        L.marker(workout.coords)
+          .addTo(this.#map)
+          .bindPopup(
+            L.popup({
+              maxWidth: 250,
+              minWidth: 100,
+              autoClose: false,
+              closeOnClick: false,
+              className: `${workout.type}-popup`,
+            })
+          )
+          .setPopupContent(
+            `${workout.type === "running" ? "🏃‍♂️" : "🚴‍♀️"} ${workout.description}`
+          )
+          .openPopup();
+      } else {
+        console.error("Invalid workout coordinates", workout);
+      }
     }
 
     _renderWorkout(workout) {
@@ -398,6 +423,87 @@ if (
 ) {
   const usernameInput = document.querySelector(".usernameIn");
   usernameInput.focus();
+
+  const passwordInput = document.getElementById("password");
+  const strengthText = document.getElementById("password-strength-text");
+  const registerForm = document.getElementById("register-form");
+
+  const lengthEl = document.getElementById("length");
+  const lowerUpperEl = document.getElementById("lower-upper");
+  const numberEl = document.getElementById("number");
+  const symbolEl = document.getElementById("symbol");
+  const commonEl = document.getElementById("common");
+
+  // Rules object (we update this live)
+  const rules = {
+    length: false,
+    lowerUpper: false,
+    number: false,
+    symbol: false,
+    common: false,
+  };
+
+  passwordInput.addEventListener("input", function () {
+    const passwordValue = passwordInput.value;
+    const result = zxcvbn(passwordValue);
+
+    // Strength indicator
+    let message = "";
+    switch (result.score) {
+      case 0:
+        message = "Very Weak 🔴";
+        break;
+      case 1:
+        message = "Weak 🔸";
+        break;
+      case 2:
+        message = "Fair ⚠️";
+        break;
+      case 3:
+        message = "Good ✅";
+        break;
+      case 4:
+        message = "Strong 💪";
+        break;
+    }
+
+    strengthText.textContent = `Strength: ${message}`;
+    strengthText.style.color =
+      result.score < 2 ? "red" : result.score < 4 ? "orange" : "green";
+
+    // Rule checks (update object)
+    rules.length = passwordValue.length >= 8;
+    rules.lowerUpper =
+      /[a-z]/.test(passwordValue) && /[A-Z]/.test(passwordValue);
+    rules.number = /\d/.test(passwordValue);
+    rules.symbol = /[!@#$%^&*(),.?":{}|<>]/.test(passwordValue);
+    rules.common = result.score > 1;
+
+    // Update checklist UI
+    lengthEl.className = rules.length ? "valid" : "invalid";
+    lowerUpperEl.className = rules.lowerUpper ? "valid" : "invalid";
+    numberEl.className = rules.number ? "valid" : "invalid";
+    symbolEl.className = rules.symbol ? "valid" : "invalid";
+    commonEl.className = rules.common ? "valid" : "invalid";
+  });
+
+  // Prevent form submission if rules are not all met
+  registerForm.addEventListener("submit", function (e) {
+    const allValid = Object.values(rules).every((rule) => rule === true);
+    if (!allValid) {
+      e.preventDefault(); // Stop form from submitting
+
+      // Toastify message
+      Toastify({
+        text: "Please meet all password requirements before signing up.",
+        duration: 3000,
+        gravity: "top",
+        position: "center",
+        className: "large-toast",
+        backgroundColor: "linear-gradient(to right, #ff0000, #ff7300)",
+      }).showToast();
+    }
+  });
 }
 
 if (document.body.classList.contains("profile")) {
@@ -415,7 +521,7 @@ if (document.body.classList.contains("profile")) {
     "currentProfileImageContainer"
   );
   const stepsContainer = document.getElementById("steps");
-  const stepGoal = parseInt(stepsContainer.dataset.stepGoal);
+
   const ctx = document.getElementById("weightChart").getContext("2d");
 
   let cropper;
@@ -554,8 +660,8 @@ if (document.body.classList.contains("profile")) {
               annotations: {
                 targetWeightLine: {
                   type: "line",
-                  yMin: 70,
-                  yMax: 70,
+                  yMin: 75,
+                  yMax: 75,
                   borderColor: "red",
                   borderWidth: 2,
                   label: {
@@ -607,7 +713,7 @@ if (document.body.classList.contains("profile")) {
     .then((chartData) => {
       const chartCanvas = document.getElementById("stepsChart");
       const ctx = chartCanvas.getContext("2d");
-
+      const stepGoal = chartData.stepGoal;
       const labelCount = chartData.labels.length;
       chartCanvas.width = labelCount * 80;
 

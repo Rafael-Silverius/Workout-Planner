@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("id", $userId, $weight);
 
         if ($stmt->execute()) {
-            $_SESSION["toast_message"] = "Your weight was succeffully updated 🎉";
+            $_SESSION["toast_message"] = "Your weight was successfully updated 🎉";
             header("Location: ../public/profile.php");
             exit();
         } else {

@@ -6,7 +6,7 @@ header('Content-Type: application/json');
 
 $userId = $_SESSION['user_id'];
 
-$sql = "SELECT step_goal FROM users WHERE id = ?";
+$sql = "SELECT step_goal FROM goals WHERE user_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userId);
 $stmt->execute();

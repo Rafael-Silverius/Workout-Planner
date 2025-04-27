@@ -26,6 +26,7 @@ unset($_SESSION["error_message"]);
     <link rel="icon" type="image/x-icon" href="../assets/icons/fitness.png">
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/zxcvbn@4.4.2/dist/zxcvbn.js"></script>
     <script defer src="script.js"></script>
     <!-- Include Toastify.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -46,7 +47,7 @@ unset($_SESSION["error_message"]);
     <div class="login-container">
         <h2 class="form__title">Register</h2>
         <p class="form__title">Enter your credentials to create an account</p>
-        <form method="POST" class="form" action="../backend/register.php">
+        <form method="POST" class="form" id="register-form" action="../backend/register.php">
             <div class="form__row">
                 <input class="form__input usernameIn" type="text" name="username" placeholder="Username" required>
             </div>
@@ -54,10 +55,24 @@ unset($_SESSION["error_message"]);
                 <input class="form__input" type="email" name="email" placeholder="Email" required>
             </div>
             <div class="password-wrapper form__row">
+
                 <input class="form__input" type="password" name="password" placeholder="Password" required minlength="6" id="password">
                 <div class="toggle-password" onclick="togglePassword()">
                     <i class="fa fa-fw fa-eye field-icon "></i>
                 </div>
+            </div>
+            <div class="form__row">
+                <div id="password-strength-text" style="font-size: 14px; color: #fff;"></div>
+            </div>
+            <div class="password-tips">
+                <p><strong>Password must include:</strong></p>
+                <ul id="password-rules">
+                    <li id="length" class="invalid">At least 8 characters</li>
+                    <li id="lower-upper" class="invalid">Lowercase & Uppercase letters</li>
+                    <li id="number" class="invalid">At least one number</li>
+                    <li id="symbol" class="invalid">At least one symbol (!@#$...)</li>
+                    <li id="common" class="invalid">Avoid common or personal info</li>
+                </ul>
             </div>
             <div class="form__row">
                 <button class="form__btn" type="submit">Sign Up</button>

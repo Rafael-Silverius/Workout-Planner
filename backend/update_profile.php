@@ -64,41 +64,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Update user info
-    $sql = "UPDATE users SET username = ?, location = ? , bio = ?, birth = ?, step_goal = ?, height = ?, weight = ?";
-    if ($imagePath) {
-        $sql .= ", profile_img = ?";
-    }
-    $sql .= " WHERE id = ?";
+    try {
+        // 1. Update users table
+        $sqlUser = "UPDATE users SET username = ?, location = ?, bio = ?, birth = ?";
+        if ($imagePath) $sqlUser .= ", profile_img = ?";
+        $sqlUser .= " WHERE id = ?";
+        $stmtUser = $conn->prepare($sqlUser);
+        if ($imagePath) {
+            $stmtUser->bind_param("sssssi", $username, $location, $bio, $birth, $imagePath, $userId);
+        } else {
+            $stmtUser->bind_param("ssssi", $username, $location, $bio, $birth, $userId);
+        }
+        $stmtUser->execute();
+        $stmtUser->close();
 
-    $stmt = $conn->prepare($sql);
+        // 2. Update or Insert into goals table
+        $stmtGoalCheck = $conn->prepare("SELECT id FROM goals WHERE user_id = ?");
+        $stmtGoalCheck->bind_param("i", $userId);
+        $stmtGoalCheck->execute();
+        $resultGoal = $stmtGoalCheck->get_result();
 
-    if ($imagePath) {
-        $stmt->bind_param("sssssddsi", $username, $location, $bio, $birth, $step_goal, $height, $weight, $imagePath, $userId);
-    } else {
-        $stmt->bind_param("sssssddi", $username, $location, $bio, $birth, $step_goal, $height, $weight, $userId);
-    }
+        if ($resultGoal->num_rows > 0) {
+            // Entry exists – update
+            $stmtGoal = $conn->prepare("UPDATE goals SET step_goal = ? WHERE user_id = ?");
+            $stmtGoal->bind_param("ii", $step_goal, $userId);
+            $stmtGoal->execute();
+            $stmtGoal->close();
+        } else {
+            // Entry doesn't exist – insert
+            $stmtGoal = $conn->prepare("INSERT INTO goals (user_id, step_goal) VALUES (?, ?)");
+            $stmtGoal->bind_param("ii", $userId, $step_goal);
+            $stmtGoal->execute();
+            $stmtGoal->close();
+        }
+        $stmtGoalCheck->close();
 
-    if ($stmt->execute()) {
-        // Update session values
+        // 3. Update or Insert into biometrics table
+        $stmtBioCheck = $conn->prepare("SELECT id FROM biometrics WHERE user_id = ?");
+        $stmtBioCheck->bind_param("i", $userId);
+        $stmtBioCheck->execute();
+        $resultBio = $stmtBioCheck->get_result();
+
+        if ($resultBio->num_rows > 0) {
+            // Entry exists – update
+            $stmtBio = $conn->prepare("UPDATE biometrics SET height = ? WHERE user_id = ?");
+            $stmtBio->bind_param("di", $height, $userId);
+            $stmtBio->execute();
+            $stmtBio->close();
+        } else {
+            // Entry doesn't exist – insert
+            $stmtBio = $conn->prepare("INSERT INTO biometrics (user_id, height) VALUES (?, ?)");
+            $stmtBio->bind_param("di", $userId, $height);
+            $stmtBio->execute();
+            $stmtBio->close();
+        }
+        $stmtBioCheck->close();
+
+        // Commit transaction
+        $conn->commit();
+
+        // Update session variables
         $_SESSION['username'] = $username;
         $_SESSION['location'] = $location;
         $_SESSION['bio'] = $bio;
         $_SESSION['birth'] = $birth;
         $_SESSION['step_goal'] = $step_goal;
         $_SESSION['height'] = $height;
-        $_SESSION['weight'] = $weight;
-        if ($imagePath) {
-            $_SESSION['profile_img'] = $imagePath;
-        }
+        if ($imagePath) $_SESSION['profile_img'] = $imagePath;
 
-        $_SESSION["toast_message"] = "Profile Succesfully Updated 🎉";
-
+        $_SESSION["toast_message"] = "Profile successfully updated 🎉";
         header("Location: ../public/profile.php");
         exit();
-    } else {
-        $_SESSION["error_message"] = "There was an error when updating your profile info 😢";
+    } catch (Exception $e) {
+        $conn->rollback();
+        $_SESSION["error_message"] = "Error updating profile: " . $e->getMessage();
+        header("Location: ../public/profile.php");
+        exit();
     }
 
-    $stmt->close();
     $conn->close();
 }

@@ -87,10 +87,6 @@ nav a {
 
 .form {
   padding: 1.5rem 2.75rem;
-
-  /* display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem 2.5rem; */
   transition: all 0.5s, transform 1ms;
 }
 .workouts-form {
@@ -135,7 +131,7 @@ nav a {
   width: 100%;
   padding: 0.3rem 0.8rem;
   color: var(--color-dark--1);
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   border: none;
   border-radius: 3px;
   background-color: var(--color-light--3);
@@ -263,7 +259,7 @@ button {
 .editProfilebtn {
   display: flex;
   align-items: center;
-  padding: 0px 4px;
+  gap: 8px;
 }
 
 #deleteProfile {
@@ -374,13 +370,18 @@ button {
   display: flex;
   flex-direction: column;
   padding: 4.2rem 2rem 2.1rem;
-  border: 2px solid #ffffff6e;
   margin: 14rem auto auto auto;
   border-radius: 8px;
+  background-color: var(--color-light--2);
+  color: #42484d;
 }
 
 .login-container > p {
   font-size: 20px;
+  color: var(--color-dark--2);
+}
+.login-container > h2 {
+  color: var(--color-dark--2);
 }
 
 .password-wrapper {
@@ -397,6 +398,22 @@ button {
   border: none;
   cursor: pointer;
   font-size: 18px;
+}
+
+#password-rules {
+  font-weight: 400;
+  font-size: 14px;
+  list-style: none;
+}
+.password-tips {
+  font-size: 14px;
+  font-weight: 400;
+}
+.password-tips li.invalid {
+  color: red;
+}
+.password-tips li.valid {
+  color: green;
 }
 .field-icon {
   color: var(--color-dark--1);
@@ -554,7 +571,7 @@ select option {
 }
 .tabs {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   margin-bottom: 20px;
 }
 
@@ -708,6 +725,7 @@ select option {
   width: 100%;
   margin-top: 10px;
   cursor: pointer;
+  color: var(--color-light--2);
 }
 
 .modal-btn.danger {
@@ -774,8 +792,5 @@ footer {
   }
   .steps {
     text-align: left;
-  }
-  body {
-    height: auto;
   }
 }

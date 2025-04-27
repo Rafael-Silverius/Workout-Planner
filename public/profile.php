@@ -4,7 +4,7 @@ include('../backend/config.php');
 
 if (isset($_SESSION['user_id'])) {
     // Get profile info
-    $stmt = $conn->prepare("SELECT username, email, created_at, location, birth, bio, height, step_goal FROM users WHERE id = ?");
+    $stmt = $conn->prepare("SELECT username, email, created_at, location, birth, bio FROM users WHERE id = ?");
     $stmt->bind_param("i", $_SESSION['user_id']);
 
     if ($stmt->execute()) {
@@ -16,8 +16,30 @@ if (isset($_SESSION['user_id'])) {
             $_SESSION['location'] = $row['location'];
             $_SESSION['birth'] = $row['birth'];
             $_SESSION['bio'] = $row['bio'];
-            $_SESSION['height'] = $row['height'];
+        }
+    }
+    $stmt->close();
+
+    //Get step_goal and weight_goal
+    $stmt = $conn->prepare("SELECT step_goal FROM goals WHERE user_id = ?");
+    $stmt->bind_param("i", $_SESSION['user_id']);
+
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        if ($result && $row = $result->fetch_assoc()) {
             $_SESSION['step_goal'] = $row['step_goal'];
+        }
+    }
+    $stmt->close();
+
+    //Get current biometrics
+    $stmt = $conn->prepare("SELECT height FROM biometrics WHERE user_id = ?");
+    $stmt->bind_param("i", $_SESSION['user_id']);
+
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        if ($result && $row = $result->fetch_assoc()) {
+            $_SESSION['height'] = $row['height'];
         }
     }
     $stmt->close();
@@ -35,7 +57,7 @@ if (isset($_SESSION['user_id'])) {
     $stmt->close();
 
     //Get steps
-    $stmt = $conn->prepare("SELECT steps FROM steps WHERE user_id = ? ");
+    $stmt = $conn->prepare("SELECT steps FROM steps WHERE user_id = ? AND date= CURDATE()");
     $stmt->bind_param("i", $_SESSION['user_id']);
 
     if ($stmt->execute()) {
@@ -94,7 +116,7 @@ if (isset($_SESSION['user_id'])) {
                         alt="Profile Picture"
                         class="profile-img"
                         onerror="this.src='../assets/icons/user.png';" />
-                    <div class="">
+                    <div>
                         <h2> <?php echo ucfirst($_SESSION['username']); ?></h2>
                         <h3>Location: <span><?php echo isset($_SESSION['location']) ? $_SESSION['location'] : ''; ?></span></h3>
                         <h3 class="bio"><?php echo isset($_SESSION['bio']) ? $_SESSION['bio'] : ''; ?></h3>
@@ -102,7 +124,7 @@ if (isset($_SESSION['user_id'])) {
                 </div>
                 <button class="editProfilebtn" id="editProfile">
                     <img src="../assets/icons/edit.png" alt="editIcon">
-                    Edit
+                    Edit your profile
                 </button>
             </div>
 
@@ -120,7 +142,6 @@ if (isset($_SESSION['user_id'])) {
                     $steps = $_SESSION['steps'];
                     $step_goal = $_SESSION['step_goal'];
                     $progress = ($steps / $step_goal) * 100; // Calculate percentage progress
-
                     // Define motivational messages based on progress
                     if ($progress >= 100) {
                         $message = "Great job! You've hit your goal!";
@@ -130,8 +151,10 @@ if (isset($_SESSION['user_id'])) {
                         $message = "Nice work! Halfway to your goal!";
                     } elseif ($progress >= 25) {
                         $message = "Good start! Keep up the effort!";
-                    } else {
+                    } elseif ($progress > 0) {
                         $message = "You’re doing great! Let’s keep moving!";
+                    } else {
+                        $message = "Lets start exercising!";
                     }
 
                     echo '<div class="profile-box steps">
@@ -242,14 +265,9 @@ if (isset($_SESSION['user_id'])) {
             </div>
             <div
                 class="chart-container hidden"
-                id="steps"
-                data-step-goal="<?= $_SESSION['step_goal'] ?>">
+                id="steps">
                 <?php
-                if ($_SESSION['steps'] != 0) {
-                    echo '<canvas id="stepsChart"></canvas>';
-                } else {
-                    echo '<button onclick="window.location.href=\'log_workout.php\'">Start by logging a workout</button>';
-                }
+                echo '<canvas id="stepsChart"></canvas>';
                 ?>
                 <button class="button tab-button" onclick="window.location.href='log_workout.php'">Add new workout</button>
             </div>
@@ -302,7 +320,7 @@ if (isset($_SESSION['user_id'])) {
                     <div class="form__row">
                         <label for="birth" class="form__label">Date of Birth</label>
                         <input class="form__input" type="date" name="birth"
-                            value="<?php echo isset($_SESSION['birth']) ? $_SESSION['birth'] : ''; ?>"
+                            value="<?php echo isset($_SESSION['birth']) ? $_SESSION['birth'] : '-'; ?>"
                             max="<?php echo date('Y-m-d'); ?>">
                     </div>
                     <div class="form__row">

@@ -6,9 +6,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST["username"];
     $password = $_POST["password"];
 
-    //Prepared Statement
-    $stmt = $conn->prepare("SELECT id, username, password, email, bio, birth, step_goal, weight, height, profile_img, created_at  FROM users WHERE username = ?");
-
+    //Prepared Statement to fetch user by username
+    $stmt = $conn->prepare("SELECT id, username, password, email, bio, birth, profile_img, created_at FROM users WHERE username = ?");
 
     if ($stmt) {
         $stmt->bind_param("s", $username);
@@ -18,51 +17,69 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
 
-                // Verify the hashed password from the database
                 if (password_verify($password, $row['password'])) {
-                    // Set the session variables
+                    // Set basic session data
                     $_SESSION["user_id"] = $row["id"];
-                    $_SESSION["username"] = $username; // Store username in session
+                    $_SESSION["username"] = $username;
                     $_SESSION["email"] = $row["email"];
                     $_SESSION["bio"] = $row["bio"];
                     $_SESSION["birth"] = $row["birth"];
-                    $_SESSION["step_goal"] = $row["step_goal"];
-                    $_SESSION["weight"] = $row["weight"];
-                    $_SESSION["height"] = $row["height"];
                     $_SESSION["profile_img"] = $row["profile_img"];
                     $_SESSION["created_at"] = $row["created_at"];
 
-                    $_SESSION["toast_message"] = "Welcome back " . ucfirst($_SESSION['username']) . "👋";
+                    $user_id = $row["id"];
 
-                    // Redirect to the homepage or dashboard (Ensure the correct path)
+                    // Fetch step goal from goals table
+                    $goal_stmt = $conn->prepare("SELECT step_goal FROM goals WHERE user_id = ?");
+                    if ($goal_stmt) {
+                        $goal_stmt->bind_param("i", $user_id);
+                        $goal_stmt->execute();
+                        $goal_result = $goal_stmt->get_result();
+                        if ($goal_result->num_rows > 0) {
+                            $goal_row = $goal_result->fetch_assoc();
+                            $_SESSION["step_goal"] = $goal_row["step_goal"];
+                        }
+                        $goal_stmt->close();
+                    }
+
+                    // Fetch weight and height from biometrics table
+                    $bio_stmt = $conn->prepare("SELECT weight, height FROM biometrics WHERE user_id = ?");
+                    if ($bio_stmt) {
+                        $bio_stmt->bind_param("i", $user_id);
+                        $bio_stmt->execute();
+                        $bio_result = $bio_stmt->get_result();
+                        if ($bio_result->num_rows > 0) {
+                            $bio_row = $bio_result->fetch_assoc();
+                            $_SESSION["weight"] = $bio_row["weight"];
+                            $_SESSION["height"] = $bio_row["height"];
+                        }
+                        $bio_stmt->close();
+                    }
+
+                    $_SESSION["toast_message"] = "Welcome back " . ucfirst($_SESSION['username']) . " 👋";
                     header("Location: ../public/index.php");
                     exit();
                 } else {
-                    // If the password is incorrect, show an error message
                     $_SESSION["error_message"] = "Invalid username or password.";
                     header("Location: ../public/login_page.php");
                     exit();
                 }
             } else {
-                // If the username is not found, show an error message
                 $_SESSION["error_message"] = "Invalid username or password.";
                 header("Location: ../public/login_page.php");
                 exit();
             }
         } else {
-            // If the statement execution fails
             $_SESSION["error_message"] = "Database query execution failed: " . $stmt->error;
             header("Location: ../public/login_page.php");
             exit();
         }
         $stmt->close();
     } else {
-        // If the statement preparation fails
         $_SESSION["error_message"] = "Database error: Could not prepare statement.";
         header("Location: ../public/login_page.php");
         exit();
     }
-    // Close the database connection
     $conn->close();
 } else {
     $_SESSION["error_message"] = "Invalid request method.";

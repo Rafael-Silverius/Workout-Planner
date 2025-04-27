@@ -7,6 +7,8 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: ./login_page.php');
     exit();
 }
+
+include('../backend/height_is_set.php');
 ?>
 
 <!DOCTYPE html>
@@ -44,6 +46,9 @@ if (!isset($_SESSION['user_id'])) {
 
 
     <div class="main">
+        <?php
+        if (!$showHeightPrompt) {
+            echo '
         <div class="sidebar">
             <ul class="workouts">
                 <div class="spinner-container">
@@ -81,7 +86,18 @@ if (!isset($_SESSION['user_id'])) {
         </div>
 
         <!-- Hero Section -->
-        <div id="map"></div>
+        
+           <div id="map"></div>';
+        } else {
+            echo '<div class="login-container" >
+        <h2>⚠️ Please set your height first!</h2>
+        <p style="margin: 20px 0;">Go to your profile page to update your height for better workout tracking.</p>
+        <a href="profile.php" style="padding: 20px 40px; width:fit-content; margin-left:auto; font-size:16px; background-color: #FF6B6B; color: white; text-decoration: none; border-radius: 6px; font-weight: semi-bold;">
+            Update Height
+        </a>
+    </div>';
+        }
+        ?>
     </div>
 
     <!-- Footer Section -->
