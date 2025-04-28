@@ -30,7 +30,6 @@
 - Clone the repository:
   ```bash
   git clone https://github.com/your-username/workout-logger.git
-  ```
 <ul> 
   <li>Set up a local server:
     <ul>
