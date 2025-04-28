@@ -1,5 +1,5 @@
 <h1>🏋️‍♂️ Workout Logger </h1>
-<h3>A web-based workout planner and logger that helps users track their running and cycling activities. Built with PHP, MySQL, HTML, CSS, JavaScript, and Leaflet.js for an interactive map experience.</h3>
+<p>A web-based workout planner and logger that helps users track their running and cycling activities. Built with PHP, MySQL, HTML, CSS, JavaScript, and Leaflet.js for an interactive map experience.</p>
 
 <h2>🚀 Features</h2>
 <ul>
