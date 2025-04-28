@@ -27,11 +27,11 @@
 </ul>
 
 <h2>🧑‍💻 How to Run Locally</h2>
-<ul>
- - Clone the repository:
+- Clone the repository:
   ```bash
   git clone https://github.com/your-username/workout-logger.git
   ```
+<ul> 
   <li>Set up a local server:
     <ul>
       <li>Use XAMPP / MAMP / WAMP.</li>
