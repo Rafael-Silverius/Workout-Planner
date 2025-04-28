@@ -425,11 +425,11 @@ button {
 .main {
   display: flex;
   padding: 0rem 4rem;
-  height: auto;
 }
+
 .sidebar {
   flex: 1;
-  padding: 3rem 5rem 4rem 5rem;
+  padding: 3rem 2rem 4rem 1rem;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -438,6 +438,7 @@ button {
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
 }
+
 #map {
   height: 100%;
   flex: 3;
@@ -749,6 +750,7 @@ select option {
   height: 50px;
   animation: spin 1s linear infinite;
 }
+
 .hidden {
   display: none;
 }
@@ -786,11 +788,7 @@ footer {
     display: flex;
     flex-direction: column;
   }
-  .profile-box-content {
-    display: flex;
-    flex-direction: column;
-  }
-  .steps {
-    text-align: left;
+  main {
+    height: auto;
   }
 }

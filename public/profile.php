@@ -251,7 +251,7 @@ if (isset($_SESSION['user_id'])) {
             </div>
 
 
-            <div class="profile-boxes chart-container hidden" id="weight">
+            <div class="profile-boxe chart-container hidden" id="weight">
                 <canvas id="weightChart"></canvas>
                 <form class="form" id="weightForm" method="POST" action="../backend/update_weight.php">
                     <label class="form__label">Enter today's weight (kg):</label>
