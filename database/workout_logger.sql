@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 27, 2025 at 11:10 PM
+-- Generation Time: Apr 28, 2025 at 01:56 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -85,7 +85,8 @@ INSERT INTO `steps` (`id`, `user_id`, `steps`, `date`) VALUES
 (10, 1, 5050, '2025-04-18'),
 (12, 1, 12406, '2025-04-25'),
 (13, 8, 4127, '2025-04-25'),
-(14, 10, 5979, '2025-04-27');
+(14, 10, 5979, '2025-04-27'),
+(15, 10, 13452, '2025-04-28');
 
 -- --------------------------------------------------------
 
@@ -137,7 +138,9 @@ INSERT INTO `weights` (`id`, `user_id`, `weight`, `date`) VALUES
 (37, 1, 70, '2025-04-21 12:16:03'),
 (38, 1, 75, '2025-04-25 11:11:13'),
 (39, 1, 60, '2025-04-25 12:09:59'),
-(40, 10, 78, '2025-04-27 23:35:59');
+(40, 10, 78, '2025-04-27 23:35:59'),
+(41, 10, 75, '2025-04-28 14:55:24'),
+(42, 10, 76, '2025-04-28 14:55:31');
 
 -- --------------------------------------------------------
 
@@ -171,7 +174,9 @@ INSERT INTO `workouts` (`id`, `user_id`, `type`, `distance`, `duration`, `cadenc
 (53, 8, 'running', 4.00, 30, 0, NULL, 38.03334501, 23.67742538, 'Running on April25', '2025-04-24 21:00:00'),
 (54, 8, 'running', 5.00, 30, 0, NULL, 38.02089359, 23.67498713, 'Running on April25', '2025-04-24 21:00:00'),
 (55, 8, 'running', 3.00, 23, 0, NULL, 38.00859125, 23.67124557, 'Running on April25', '2025-04-24 21:00:00'),
-(57, 10, 'running', 4.00, 45, 4, NULL, 38.01210868, 23.69493484, 'Running on April27', '2025-04-26 21:00:00');
+(57, 10, 'running', 4.00, 45, 4, NULL, 38.01210868, 23.69493484, 'Running on April27', '2025-04-26 21:00:00'),
+(58, 10, 'cycling', 10.00, 30, NULL, 0, 37.99263090, 23.64955940, 'Cycling on April28', '2025-04-27 21:00:00'),
+(59, 10, 'running', 12.00, 65, 0, NULL, 38.03267341, 23.65749171, 'Running on April28', '2025-04-27 21:00:00');
 
 --
 -- Indexes for dumped tables
@@ -241,7 +246,7 @@ ALTER TABLE `goals`
 -- AUTO_INCREMENT for table `steps`
 --
 ALTER TABLE `steps`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -253,13 +258,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `weights`
 --
 ALTER TABLE `weights`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `workouts`
 --
 ALTER TABLE `workouts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- Constraints for dumped tables
