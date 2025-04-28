@@ -29,7 +29,7 @@
 <h2>🧑‍💻 How to Run Locally</h2>
 <ul>
   <li>Clone the repository:
-  ```git clone https://github.com/your-username/workout-logger.git```
+  ```bash git clone https://github.com/your-username/workout-logger.git
   </li>
   <li>Set up a local server:
     <ul>
