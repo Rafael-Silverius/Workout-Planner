@@ -25,3 +25,60 @@
   </ul>
   </li>
 </ul>
+
+<h2>🧑‍💻 How to Run Locally</h2>
+<ul>
+  <li>Clone the repository:
+  ```git clone https://github.com/your-username/workout-logger.git```
+  </li>
+  <li>Set up a local server:
+    <ul>
+      <li>Use XAMPP / MAMP / WAMP.</li>
+      <li>Place project inside /htdocs (for XAMPP).</li>
+    </ul>
+  </li>
+  <li>Create MySQL database:
+    <ul>
+      <li>Import the provided database.sql file (if available).</li>
+      <li>Update backend/config.php with your DB credentials.</li>
+    </ul>
+  </li>
+  <li>Run the app:
+  <ul>
+    <li>Visit http://localhost/workout-planner/public/ .</li>
+  </ul>
+  </li>
+</ul>
+
+<h2>⚙️ Environment Variables</h2>
+<p>You might need to configure:</p>
+<ul>
+  <li>DB_HOST</li>
+  <li>DB_USER</li>
+  <li>DB_PASSWORD</li>
+  <li>DB_NAME</li>
+</ul>
+<small>All settings are inside backend/config.php.</small>
+
+<h2>✨ Future Improvements</h2>
+<ul>
+  <li>📱 Make it fully responsive for mobile.</li>
+  <li>🎯 Add goal tracking (e.g., 5K run goal).</li>
+  <li>🏆 Implement badges/achievements.</li>
+  <li>🧩 Export workouts to CSV or JSON.</li>
+  <li>🧠 Improve error handling and offline support.</li>
+</ul>
+<h2>🙌 Acknowledgements</h2>
+<ul>
+  <li>Leaflet.js</li>
+  <li>Toastify.js</li>
+  <li>OpenStreetMap</li>
+</ul>
+
+<h2>📜 License</h2>
+<p>This project is licensed under the MIT License — feel free to use, modify, and distribute it!</p>
+
+<h2>📬 Contact</h2>
+<p>Feel free to reach out if you have suggestions or questions:</p>
+<p>GitHub: Rafael Walder</p>
+<p>Email: rafaelwalder99@gmail.com</p>
